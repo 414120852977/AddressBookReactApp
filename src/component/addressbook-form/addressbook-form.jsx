@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import ToolBar from './toolbar';
 import CancelIcon from '../../assets/icons/cancelIcon.png'
 import './addressbook-form.scss'
+import AddressBookService from '../../service/addressbookservice';
 const  AddressBookForm = (props) => {
     let initialValue = {
         name: '',
@@ -10,14 +11,14 @@ const  AddressBookForm = (props) => {
         state: '',
         zipcode: '',
         phoneNumber: '',
-        id: '',
+        isUpdate: false,
         error: {
             name: '',
             address: '',
             city: '',
             state: '',
             zipcode: '',
-            phoneNumber: '',
+            phoneNumber: ''
         }
     }
     const [formValue, setForm] = useState(initialValue);
@@ -34,6 +35,7 @@ const  AddressBookForm = (props) => {
             state: '',
             zipcode: '',
             phoneNumber: '',
+
         }
 
         let nameRegex = RegExp('^[A-Z]{1}[a-zA-Z\\s]{2,}$')
@@ -67,19 +69,44 @@ const  AddressBookForm = (props) => {
             isError = true;
         }
 
-        let phoneNumberRegex = RegExp('[+]{0,1}[0-9]{1,}\\s[1-9]{1}[0-9]{9}$')
-        if (phoneNumberRegex.test(formValue.phoneNumber)) {
-            isError = false;
-        } else {
-            error.phoneNumber = 'Invalid Phone Number'
-            isError = true;
-        }
+        // let phoneNumberRegex = RegExp('^[1-9]\d{2}-\d{3}-\d{4}')
+        // if (phoneNumberRegex.test(formValue.phoneNumber)) {
+        //     isError = false;
+        // } else {
+        //     error.phoneNumber = 'Invalid Phone Number'
+        //     isError = true;
+        // }
 
         await setForm({ ...formValue, error: error })
         return isError;
     }
-   
-       
+   const addressBookService = new AddressBookService();
+       const save =async(event) => {
+            event.preventDefault();
+            if(await validData()) {
+                console.log('error',formValue);
+            return;
+        }
+
+       let object = {
+           name: formValue.name,
+           address: formValue.address,
+           city: formValue.city,
+           state:formValue.state,
+           zipcode: formValue.zipcode,
+           phoneNumber: formValue.phoneNumber
+         }
+
+         addressBookService.addingPerson(object).then(response => {
+             alert("data added successfully");
+             reset();
+             console.log("Data added");
+         }).catch(err => {
+             console.log("err while Add")
+ 
+         })
+    }
+        
     
     const reset = () =>{
         setForm({...initialValue})
@@ -92,7 +119,7 @@ const  AddressBookForm = (props) => {
                 <ToolBar />
     
                 <div className="form-content">
-                    <form className="form " action="#" >
+                    <form className="form " action="#" onSubmit={save} >
                         <div className="form-head">
                             <div className="form-head-text">PERSON ADDRESS FORM</div>
                             <div className="cancel-img"><img src={CancelIcon} alt="cancelIcon" /></div>
@@ -107,7 +134,7 @@ const  AddressBookForm = (props) => {
                         <div className="row-content">
                             <label htmlFor="address" className="label text"></label>
                             <input type="text" className="input" value={formValue.address} onChange={changeValue} id="address" name="address" placeholder="Address.." required
-                                style={{ height: "100px" }} />
+                                style={{ height: "80px" }} />
                         </div>
                         <div className="error-output">{formValue.error.address}</div>
                         <div className="row-content">
@@ -136,7 +163,7 @@ const  AddressBookForm = (props) => {
                                 
                                 <select id="state" name="state" value={formValue.state} onChange={changeValue} required>
                                     <option value="">Select State</option>
-                                    <option value="Jharkhand">Jharkhand</option>
+                                    <option value="Gujrat">Jharkhand</option>
                                     <option value="Karnataka">Karnataka</option>
                                     <option value="Maharastra">Maharastra</option>
                                     <option value="Punjab">Punjab</option>
@@ -159,7 +186,7 @@ const  AddressBookForm = (props) => {
                         </div>
                         <div className="button-parent">
                             <div className="add-reset">
-                                <button className="button addButton" type="submit">Add</button>
+                            <button className="button addButton" type="submit">Add</button>
                                 <button type="reset" onClick={reset} className="button resetButton">Reset</button>
                             </div>
                         </div>
@@ -169,5 +196,5 @@ const  AddressBookForm = (props) => {
             </div>
     
         );
-        }
+    }
 export default AddressBookForm;
